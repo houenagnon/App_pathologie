@@ -31,7 +31,7 @@ def draw_boxes(image, detections):
 
 # Fonction pour traiter et annoter une image ou une vidéo
 def annotate_media(media_file, api_url):
-    temp_file_path = "./tmp/temp_media_file"
+    temp_file_path = "./tmp/"
     annotated_video_path = "./tmp/annotated_video.mp4"
     
     # Sauvegarder le fichier téléchargé sur le disque
