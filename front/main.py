@@ -1,8 +1,8 @@
-import cv2
 import numpy as np
 import io
 import requests
 import time
+import cv2
 from PIL import Image, ImageDraw
 import streamlit as st
 import os
