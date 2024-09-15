@@ -6,7 +6,7 @@ import cv2
 from PIL import Image, ImageDraw
 import streamlit as st
 import os
-
+import tempfile
 
 def save_image(image, file_path):
     with open(file_path, 'wb') as f:
@@ -30,31 +30,141 @@ def draw_boxes(image, detections):
     return image
 
 # Fonction pour traiter et annoter une image ou une vidéo
+# def annotate_media(media_file, api_url):
+
+#     # Créer un répertoire temporaire
+#     with tempfile.TemporaryDirectory() as temp_dir:
+#         # Déterminer le chemin du fichier temporaire
+#         temp_file_path = os.path.join(temp_dir, 'temp_media_file')
+
+        
+#     # temp_file_path = "./tmp/temp_media_fil"
+#     annotated_video_path = "./tmp/annotated_video.mp4"
+    
+#     # Sauvegarder le fichier téléchargé sur le disque
+#     with open(temp_file_path, "wb") as f:
+#         f.write(media_file.read())
+    
+#     if media_file.type.startswith('video'):
+#         # Traitement de la vidéo
+#         video_capture = cv2.VideoCapture(temp_file_path)
+#         frame_width = int(video_capture.get(cv2.CAP_PROP_FRAME_WIDTH))
+#         frame_height = int(video_capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
+#         fps = int(video_capture.get(cv2.CAP_PROP_FPS))
+
+#         fourcc = cv2.VideoWriter_fourcc(*'mp4v')  # Codec pour la vidéo de sortie
+#         video_writer = cv2.VideoWriter(annotated_video_path, fourcc, fps, (frame_width, frame_height))
+
+#         while video_capture.isOpened():
+#             ret, frame = video_capture.read()
+
+#             if not ret:
+#                 break
+
+#             pil_image = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+#             image_bytes = io.BytesIO()
+#             pil_image.save(image_bytes, format='JPEG')
+#             image_bytes.seek(0)
+
+#             files = {'file': image_bytes}
+#             response = requests.post(api_url, files=files)
+
+#             if response.status_code == 200:
+#                 detections = response.json()["detections"]
+#                 pil_image_with_boxes = draw_boxes(pil_image, detections)
+#                 annotated_frame = cv2.cvtColor(np.array(pil_image_with_boxes), cv2.COLOR_RGB2BGR)
+#                 video_writer.write(annotated_frame)
+#             else:
+#                 print("Erreur lors de la détection pour une frame.")
+
+#         video_capture.release()
+#         video_writer.release()
+
+#         # Lire la vidéo annotée en mémoire
+#         with open(annotated_video_path, "rb") as f:
+#             annotated_video_bytes = io.BytesIO(f.read())
+        
+#         # Nettoyer les fichiers temporaires
+#         os.remove(temp_file_path)
+#         os.remove(annotated_video_path)
+
+#         return annotated_video_bytes
+
+#     elif media_file.type.startswith('image'):
+#         # Traitement de l'image
+#         pil_image = Image.open(temp_file_path)
+#         image_bytes = io.BytesIO()
+#         pil_image.save(image_bytes, format='JPEG')
+#         image_bytes.seek(0)
+
+#         files = {'file': image_bytes}
+#         response = requests.post(api_url, files=files)
+
+#         if response.status_code == 200:
+#             detections = response.json()["detections"]
+#             pil_image_with_boxes = draw_boxes(pil_image, detections)
+#             annotated_image_bytes = io.BytesIO()
+#             pil_image_with_boxes.save(annotated_image_bytes, format='JPEG')
+#             annotated_image_bytes.seek(0)
+#             return annotated_image_bytes
+#         else:
+#             print("Erreur lors de la détection pour l'image.")
+#             return None
+
 def annotate_media(media_file, api_url):
-    temp_file_path = "./tmp/temp_media_fil"
-    annotated_video_path = "./tmp/annotated_video.mp4"
-    
-    # Sauvegarder le fichier téléchargé sur le disque
-    with open(temp_file_path, "wb") as f:
-        f.write(media_file.read())
-    
-    if media_file.type.startswith('video'):
-        # Traitement de la vidéo
-        video_capture = cv2.VideoCapture(temp_file_path)
-        frame_width = int(video_capture.get(cv2.CAP_PROP_FRAME_WIDTH))
-        frame_height = int(video_capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
-        fps = int(video_capture.get(cv2.CAP_PROP_FPS))
+    with tempfile.TemporaryDirectory() as temp_dir:
+        # Déterminer les chemins de fichiers temporaires
+        temp_file_path = os.path.join(temp_dir, "temp_media_file")
+        annotated_video_path = os.path.join(temp_dir, "annotated_video.mp4")
 
-        fourcc = cv2.VideoWriter_fourcc(*'mp4v')  # Codec pour la vidéo de sortie
-        video_writer = cv2.VideoWriter(annotated_video_path, fourcc, fps, (frame_width, frame_height))
+        # Sauvegarder le fichier téléchargé sur le disque
+        with open(temp_file_path, "wb") as f:
+            f.write(media_file.read())
 
-        while video_capture.isOpened():
-            ret, frame = video_capture.read()
+        if media_file.type.startswith('video'):
+            # Traitement de la vidéo
+            video_capture = cv2.VideoCapture(temp_file_path)
+            frame_width = int(video_capture.get(cv2.CAP_PROP_FRAME_WIDTH))
+            frame_height = int(video_capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
+            fps = int(video_capture.get(cv2.CAP_PROP_FPS))
 
-            if not ret:
-                break
+            fourcc = cv2.VideoWriter_fourcc(*'mp4v')  # Codec pour la vidéo de sortie
+            video_writer = cv2.VideoWriter(annotated_video_path, fourcc, fps, (frame_width, frame_height))
 
-            pil_image = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+            while video_capture.isOpened():
+                ret, frame = video_capture.read()
+
+                if not ret:
+                    break
+
+                pil_image = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+                image_bytes = io.BytesIO()
+                pil_image.save(image_bytes, format='JPEG')
+                image_bytes.seek(0)
+
+                files = {'file': image_bytes}
+                response = requests.post(api_url, files=files)
+
+                if response.status_code == 200:
+                    detections = response.json().get("detections", [])
+                    pil_image_with_boxes = draw_boxes(pil_image, detections)
+                    annotated_frame = cv2.cvtColor(np.array(pil_image_with_boxes), cv2.COLOR_RGB2BGR)
+                    video_writer.write(annotated_frame)
+                else:
+                    print("Erreur lors de la détection pour une frame.")
+
+            video_capture.release()
+            video_writer.release()
+
+            # Lire la vidéo annotée en mémoire
+            with open(annotated_video_path, "rb") as f:
+                annotated_video_bytes = io.BytesIO(f.read())
+                
+            return annotated_video_bytes
+
+        elif media_file.type.startswith('image'):
+            # Traitement de l'image
+            pil_image = Image.open(temp_file_path)
             image_bytes = io.BytesIO()
             pil_image.save(image_bytes, format='JPEG')
             image_bytes.seek(0)
@@ -63,47 +173,15 @@ def annotate_media(media_file, api_url):
             response = requests.post(api_url, files=files)
 
             if response.status_code == 200:
-                detections = response.json()["detections"]
+                detections = response.json().get("detections", [])
                 pil_image_with_boxes = draw_boxes(pil_image, detections)
-                annotated_frame = cv2.cvtColor(np.array(pil_image_with_boxes), cv2.COLOR_RGB2BGR)
-                video_writer.write(annotated_frame)
+                annotated_image_bytes = io.BytesIO()
+                pil_image_with_boxes.save(annotated_image_bytes, format='JPEG')
+                annotated_image_bytes.seek(0)
+                return annotated_image_bytes
             else:
-                print("Erreur lors de la détection pour une frame.")
-
-        video_capture.release()
-        video_writer.release()
-
-        # Lire la vidéo annotée en mémoire
-        with open(annotated_video_path, "rb") as f:
-            annotated_video_bytes = io.BytesIO(f.read())
-        
-        # Nettoyer les fichiers temporaires
-        os.remove(temp_file_path)
-        os.remove(annotated_video_path)
-
-        return annotated_video_bytes
-
-    elif media_file.type.startswith('image'):
-        # Traitement de l'image
-        pil_image = Image.open(temp_file_path)
-        image_bytes = io.BytesIO()
-        pil_image.save(image_bytes, format='JPEG')
-        image_bytes.seek(0)
-
-        files = {'file': image_bytes}
-        response = requests.post(api_url, files=files)
-
-        if response.status_code == 200:
-            detections = response.json()["detections"]
-            pil_image_with_boxes = draw_boxes(pil_image, detections)
-            annotated_image_bytes = io.BytesIO()
-            pil_image_with_boxes.save(annotated_image_bytes, format='JPEG')
-            annotated_image_bytes.seek(0)
-            return annotated_image_bytes
-        else:
-            print("Erreur lors de la détection pour l'image.")
-            return None
-
+                print("Erreur lors de la détection pour l'image.")
+                return None
 
 # Configuration de la page
 st.set_page_config(
