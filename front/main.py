@@ -254,7 +254,8 @@ elif section == "Uploader une image ou vidéo":
     uploaded_media = st.file_uploader("Téléchargez une image ou une vidéo", type=["jpg", "jpeg", "png", "mp4", "avi", "mov"])
 
     if uploaded_media is not None:
-        api_url = "http://127.0.0.1:8000/detect"  # URL de votre API
+        #api_url = "http://127.0.0.1:8000/detect"  # URL de votre API
+        api_url = "https://fastapi-image-25556509159.us-west1.run.app/detect_detect_post"
 
         if uploaded_media.type.startswith('video'):
             st.video(uploaded_media)  # Afficher la vidéo uploadée
