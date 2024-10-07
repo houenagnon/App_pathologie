@@ -255,7 +255,7 @@ elif section == "Uploader une image ou vidéo":
 
     if uploaded_media is not None:
         #api_url = "http://127.0.0.1:8000/detect"  # URL de votre API
-        api_url = "https://fastapi-image-25556509159.us-west1.run.app/detect_detect_post"
+        api_url = "https://fastapi-image-25556509159.us-west1.run.app/detect"
 
         if uploaded_media.type.startswith('video'):
             st.video(uploaded_media)  # Afficher la vidéo uploadée
